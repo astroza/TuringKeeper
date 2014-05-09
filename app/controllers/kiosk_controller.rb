@@ -1,0 +1,2 @@
+class KioskController < ApplicationController
+end

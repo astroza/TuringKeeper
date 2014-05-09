@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="us">
+<head>
+	<meta charset="utf-8">
+	<title>jQuery UI Example Page</title>
+	<link href="css/dot-luv/jquery-ui-1.10.4.custom.css" rel="stylesheet">
+	<script src="js/jquery-1.10.2.js"></script>
+	<script src="js/jquery-ui-1.10.4.custom.js"></script>
+	<script>
+		var steps = [["matricula_step", "matricula"], ["alumno_nuevo_step", "primer_nombre"], ["clave_step", "clave"], ["ingreso_step", "confirmar_ingreso"], ["salida_step", "confirmar_salida"]];
+		function next_input(event, next_input) {
+			if(event.keyCode == 13) {
+				$('#'+next_input).focus();
+				return false;
+			}
+			return true;
+		}
+		
+		function show_step(idx) {
+			for(i = 0; i < steps.length; i++) {
+				if(i == idx) {
+					$('#'+steps[i][0]).show();
+					$('#'+steps[i][1]).focus();
+				} else
+					$('#'+steps[i][0]).hide();
+			}
+		}
+		
+		function next_step(event, step) {
+			if(event.keyCode == 13) {
+				show_step(step);
+				return false;
+			}
+			return true;	
+		}
+		
+	</script>
+	
+</head>
+<body>
+<div id="matricula_step">
+	<input autocomplete="off" onkeydown="next_step(event, 1); return $.inArray(event.keyCode, [46, 8, 9, 27, 13, 110, 190])!=-1||(event.keyCode >= 48 && event.keyCode <= 57);" id="matricula" name="matricula" placeholder="Matricula">
+</div>
+<div id="alumno_nuevo_step">
+	<input autocomplete="off" onkeydown="next_input(event, 'primer_apellido')" id="primer_nombre" name="primer_nombre" placeholder="Primer nombre">
+	<input autocomplete="off" onkeydown="next_input(event, 'nueva_clave')" id="primer_apellido" name="primer_apellido" placeholder="Primer apellido">
+	<input autocomplete="off" type="password" onkeydown="next_input(event, 'confirmacion_clave')" id="nueva_clave" name="nueva_clave" placeholder="Clave">
+	<input autocomplete="off" type="password" onkeydown="next_step(event, 2)" id="confirmacion_clave" name="confirmacion_clave" placeholder="Reingrese clave">
+</div>
+<div id="clave_step">
+	<input autocomplete="off" type="password" onkeydown="" id="clave" name="clave" placeholder="Clave">
+</div>
+<div id="ingreso_step">
+	<button id="confirmar_ingreso" name="confirmar_ingreso">Confirmar ingreso</button>
+</div>
+<div id="salida_step">
+	<button id="confirmar_salida" name="confirmar_salida">Confirmar salida</button>
+</div>
+<script>
+		show_step(0);
+</script>
+</body>
+</html>

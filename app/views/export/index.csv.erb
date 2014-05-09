@@ -1,0 +1,3 @@
+<% checkins.each do | c | %>
+	<%= c.turing_user.identifier %>; <%= c.turing_user.FirstName %>; <%= c.turing_user.LastName %>; <%= c.created_at %>; <% if c.check_out != nil %><%= c.check_out.created_at %><% end %>;<%= c.reason %>
+<% end %>

@@ -1,0 +1,24 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Identifier:</strong>
+  <%= @turing_user.identifier %>
+</p>
+
+<p>
+  <strong>Firstname:</strong>
+  <%= @turing_user.FirstName %>
+</p>
+
+<p>
+  <strong>Lastname:</strong>
+  <%= @turing_user.LastName %>
+</p>
+
+<p>
+  <strong>Password:</strong>
+  <%= @turing_user.password %>
+</p>
+
+<%= link_to 'Edit', edit_turing_user_path(@turing_user) %> |
+<%= link_to 'Back', turing_users_path %>

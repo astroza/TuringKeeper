@@ -1,0 +1,33 @@
+<h1>Listing turing_users</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Identifier</th>
+      <th>Firstname</th>
+      <th>Lastname</th>
+      <th>Password</th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @turing_users.each do |turing_user| %>
+      <tr>
+        <td><%= turing_user.identifier %></td>
+        <td><%= turing_user.FirstName %></td>
+        <td><%= turing_user.LastName %></td>
+        <td><%= turing_user.password %></td>
+        <td><%= link_to 'Show', turing_user %></td>
+        <td><%= link_to 'Edit', edit_turing_user_path(turing_user) %></td>
+        <td><%= link_to 'Destroy', turing_user, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Turing user', new_turing_user_path %>

@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="us">
+<head>
+	<meta charset="utf-8">
+	<title>Turing Keeper</title>
+	<script>
+		var elapsed_time;
+		var max_time = 25;
+		var timer;
+		var cur_input = null;
+		var do_check_disabled = false;
+		var checkin = true;
+		
+		function set_welcome(msg) {
+			$("#welcome_message").html(msg);
+		}
+		
+		function set_bye(msg) {
+			$("#bye_message").html(msg);
+		}
+		
+		function after_identifier(event) {
+			if(event.keyCode == 13) {
+				var identifier = $("#matricula").val();
+				$.get("/turing_user_exists/"+identifier, function (ret) {
+					if(ret.exists) {
+						checkin = ret.checkin;
+						show_step(2);
+					} else
+						show_step(1);
+				});
+				return false;
+			}
+			return true;
+		}
+
+		function forward_timer() {
+			max_time = 2;
+		}
+		
+		function add_user(event) {
+			if(event.keyCode == 13) {
+				var nueva_clave = $("#nueva_clave").val();
+				var confirmacion = $("#confirmacion_clave").val();
+
+				if(nueva_clave != confirmacion) {
+					$("#nueva_clave").val("");
+					$("#confirmacion_clave").val("");
+					set_focus("nueva_clave");
+				} else {
+					identifier = $("#matricula").val();
+					first_name = $("#primer_nombre").val();
+					last_name = $("#primer_apellido").val();
+					$.post("/turing_users", {turing_user: {identifier: identifier, FirstName: first_name, LastName: last_name, password: nueva_clave}}, function(data, status) {
+						if(status == "success")
+							show_step(2);
+					}, "json");
+				}
+				return false;
+			}
+			return true;
+		}
+		
+		function do_check(event) {
+			if(do_check_disabled)
+				return false;
+				
+			if(event.keyCode == 13) {
+				identifier = $("#matricula").val();
+				reason = $("#reason").val();
+				clave = $("#clave").val();
+				$.post("/do_check", {identifier: identifier, password: clave, reason: reason}, function(data, status) {
+					if(data.result == "checkin") {
+						show_step(3);
+						set_welcome("Bienvenido "+data.first_name+"!, gracias por registrarte con nosotros");
+					} else if(data.result == "checkout") {
+						show_step(4);
+						set_bye("Hasta luego "+data.first_name+", vuelve pronto :-)");
+					} else if(data.result == "error")
+						show_step(5)
+					do_check_disabled = true;
+				}, "json");
+				return false;
+			}
+			return true;
+		}
+		
+		function start_timer()
+		{
+			elapsed_time = 0;
+			timer = setInterval(function() {
+				elapsed_time++;
+				if(elapsed_time > max_time)
+					location.reload();
+					
+				var width = 100*(elapsed_time/max_time);
+				$('#timer_progress').width(width+"%");
+			}, 1000);
+		}
+		var steps = [["matricula_step", "matricula", null], ["alumno_nuevo_step", "primer_nombre", start_timer], ["clave_step", null, function() { start_timer(); console.log(checkin); if(checkin) { $("#reason_box").show(); set_focus("reason");} else { $("#reason_box").hide(); set_focus("clave");} }], ["bienvenida", null, forward_timer], ["despedida", null, forward_timer], ['error', null, forward_timer]];
+		
+		
+		function set_focus(input_id) {
+			if(cur_input != null) {
+				$('#'+cur_input).unbind('focusout');
+			}
+			var i = $('#'+input_id);
+			i.focusout(function(event) {
+				i.focus();
+			});
+			i.focus();
+			cur_input = input_id;
+		}
+		function next_input(event, next_input) {
+			if(event.keyCode == 13) {
+				set_focus(next_input);
+				return false;
+			}
+			return true;
+		}
+		
+		function show_step(idx) {
+			for(i = 0; i < steps.length; i++) {
+				if(i == idx) {
+					$('#'+steps[i][0]).show();
+					if(steps[i][1] != null)
+						set_focus(steps[i][1]);
+					if(steps[i][2] != null)
+						steps[i][2]();
+				} else
+					$('#'+steps[i][0]).hide();
+			}
+		}
+		
+		function next_step(event, step) {
+			if(event.keyCode == 13) {
+				show_step(step);
+				return false;
+			}
+			return true;	
+		}
+		
+	</script>
+	
+</head>
+<body>
+	<div class="progress">
+	  <div id="timer_progress" class="progress-bar progress-bar-warning"  role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+	  </div>
+	</div>
+	<div class="page-header">
+	  <h1>Laboratorio Turing <small>Espiandote desde el 2009</small></h1>
+	</div>
+<div class="row">
+<div class="col-xs-6 col-xs-offset-4">
+<div id="matricula_step">
+	<div class="panel panel-default">
+	<div class="panel-heading"><h3>Ingresa tu matrícula</h3></div>
+	<div class="panel-body">
+	<input size="30" autocomplete="off" onkeydown="after_identifier(event); return $.inArray(event.keyCode, [46, 8, 9, 27, 13, 110, 190])!=-1||(event.keyCode >= 48 && event.keyCode <= 57);" id="matricula" name="matricula" placeholder="Matricula">
+	</div>
+	</div>
+</div>
+<div id="alumno_nuevo_step">
+	<div class="panel panel-default">
+	<div class="panel-heading">
+	<h3>Es tu primer ingreso, complete los siguientes campos</h3>
+	</div>
+	<div class="panel-body">
+	<input class="form-control" autocomplete="off" onkeydown="next_input(event, 'primer_apellido')" id="primer_nombre" name="primer_nombre" placeholder="Primer nombre">
+	</br>
+	<input class="form-control" autocomplete="off" onkeydown="next_input(event, 'nueva_clave')" id="primer_apellido" name="primer_apellido" placeholder="Primer apellido">
+	</div>
+	</div>
+	<div class="panel panel-default">
+	<div class="panel-heading">
+	<h3>Esta clave será solicitada en cada ingreso y salida, es equivalente a tu firma</h3>
+	</div>
+	<div class="panel-body">
+	<input class="form-control" autocomplete="off" type="password" onkeydown="next_input(event, 'confirmacion_clave')" id="nueva_clave" name="nueva_clave" placeholder="Clave">
+	</br>
+	<input class="form-control" autocomplete="off" type="password" onkeydown="add_user(event)" id="confirmacion_clave" name="confirmacion_clave" placeholder="Reingrese clave">
+	</div>
+	</div>
+</div>
+<div id="clave_step">
+	<div id="reason_box">
+	<h1>¿Por qué vienes al Turing?</h1>
+	<h4>Usa &#8595; y enter</h4>
+	</br>
+	<select onkeydown="set_focus('clave');" class="form-control" id="reason">
+		<option value="Trabajo grupal">Trabajo grupal</option>
+		<option value="Trabajo individual">Trabajo individual</option>
+		<option value="Recreacion">Recreación</option>
+		<option value="Reunion">Reunión</option>
+	</select>
+	</br>
+	</div>
+	<h1>Ingresa tu clave</h1>
+	</br>
+	<input onkeydown="do_check(event);" class="form-control" autocomplete="off" type="password" onkeydown="" id="clave" name="clave" placeholder="Clave">
+</div>
+
+<div id="bienvenida">
+	<h1 id="welcome_message">Bienvenido!!, gracias por registrar su ingreso con nosotros!</h1>
+</div>
+<div id="despedida">
+	<h2 id="bye_message">Hasta luego</h2>
+</div>
+<div id="error">
+	<p>Clave incorrecta</p>
+</div>
+</div>
+</div>
+<nav class="navbar navbar-default navbar-fixed-bottom" role="navigation">
+  <div class="container">
+    <p class="navbar-text" style="color: white;"><strong>(C) 2014 - Felipe Astroza</strong></p>
+  </div>
+</nav>
+<script>
+		show_step(0);
+		$(document).keyup(function(e) {
+			elapsed_time = -1;
+		    if(e.which == 27){
+		        location.reload();
+		    }
+		});
+		
+</script>
+</body>
+</html>
