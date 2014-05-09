@@ -110,6 +110,7 @@
 			});
 			i.focus();
 			cur_input = input_id;
+			return false;
 		}
 		function next_input(event, next_input) {
 			if(event.keyCode == 13) {
@@ -186,9 +187,9 @@
 <div id="clave_step">
 	<div id="reason_box">
 	<h1>¿Por qué vienes al Turing?</h1>
-	<h4>Usa &#8595; y enter</h4>
 	</br>
-	<select onkeydown="set_focus('clave');" class="form-control" id="reason">
+	<select onkeypress="return event.keyCode == 13 && set_focus('clave');" class="form-control" id="reason">
+		<option value="">Elige con &#8595;</option>
 		<option value="Trabajo grupal">Trabajo grupal</option>
 		<option value="Trabajo individual">Trabajo individual</option>
 		<option value="Recreacion">Recreación</option>
